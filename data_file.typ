@@ -3,7 +3,7 @@
 
 #outline()
 #set heading(numbering: "1.1",hanging-indent: 1cm,)
-// parsing of data will occur under "---" 
+// parsing of data will occur under three - 
 ---
 = Dispositivi
 == osteosintesi

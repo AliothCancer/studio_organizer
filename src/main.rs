@@ -1,10 +1,13 @@
 mod utils;
 
 use clap::{arg, command, value_parser, Arg, ArgAction, Command};
-use std::path::PathBuf;
-use utils::{csv_handler::CsvHandler, subject::Subject, *};
-
+use std::{path::PathBuf, str::FromStr};
+use utils::{file_handler::FileHandler, subject::Subject, *};
+#[macro_use] extern crate prettytable;
 fn main() {
+    let file = FileHandler::new(PathBuf::from_str("data_file.typ").unwrap());
+    let subjects = file.load_typ_file();
+
     let matches = command!() // requires `cargo` feature
         .subcommand(
             Command::new("show").args([
@@ -18,11 +21,11 @@ fn main() {
     // retrieve a subject
     if let Some(matches) = matches.subcommand_matches("show") {
         if matches.get_flag("subjects") {
-            my_prog_cmd::list_subjects();
+            subjects.list_all_subjects();
         }
 
         if let Some(subject_name) = matches.get_one::<String>("subject") {
-            my_prog_cmd::list_subject_args(subject_name);
+            subjects.list_subject_args(subject_name);
         }
     }
 }
