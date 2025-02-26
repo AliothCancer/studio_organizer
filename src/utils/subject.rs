@@ -9,29 +9,36 @@ use super::csv_file_handler::MyRow;
 #[derive(Debug)]
 pub struct Subjects(pub Vec<Subject>);
 impl Subjects {
-   
     /// merge arguments if subject name is already present, otherwise add subject and arguments
     pub(crate) fn merge_arguments(&mut self, subject_name: &String, arguments: Vec<String>) {
-        
-        if let Some(subject) = self.0.iter_mut().find(|x|&x.name == subject_name){
+        if let Some(subject) = self.0.iter_mut().find(|x| &x.name == subject_name) {
             // here the subject is already present
-            // first check differences 
-            
-            let mut new_args = arguments.clone().into_iter().map(|x|(0_u16, x))
-            .filter(|x| !subject.weighted_arguments.0.contains(x)).collect::<Vec<_>>();
-            
+            // first check differences
+
+            let mut new_args = arguments
+                .clone()
+                .into_iter()
+                .map(|x| (0_u16, x))
+                .filter(|x| !subject.weighted_arguments.0.contains(x))
+                .collect::<Vec<_>>();
+
             subject.weighted_arguments.0.append(&mut new_args);
-            println!("Subject: {} merged, current present args:{:?}", subject_name, arguments);
-        }else{
+            println!(
+                "Subject: {} merged, current present args:{:?}",
+                subject_name, arguments
+            );
+        } else {
             // here the subject is not present
-            println!("Subject: {} added with following args:{:?}", subject_name, arguments);
+            println!(
+                "Subject: {} added with following args:{:?}",
+                subject_name, arguments
+            );
             self.0.push(Subject::new(subject_name, arguments));
         }
     }
-    pub fn add_subject(&mut self,subject: Subject){
+    pub fn add_subject(&mut self, subject: Subject) {
         self.0.push(subject);
     }
-    
 }
 
 #[derive(Debug)]
@@ -46,14 +53,8 @@ impl WeightedArgs {
     pub fn new(args: Vec<String>) -> Self {
         // at the beginning, all arguments have a standard value 100
 
-        Self(
-            args.into_iter()
-                .map(|s| (0, s))
-                .collect(),
-        )
+        Self(args.into_iter().map(|s| (0, s)).collect())
     }
-
-
 }
 
 impl Subject {
@@ -64,9 +65,12 @@ impl Subject {
         }
     }
 }
-impl From<String> for Subject{
+impl From<String> for Subject {
     fn from(value: String) -> Self {
-        Subject { name: value, weighted_arguments: WeightedArgs::new(vec![]) }
+        Subject {
+            name: value,
+            weighted_arguments: WeightedArgs::new(vec![]),
+        }
     }
 }
 
@@ -76,13 +80,13 @@ impl From<&mut Reader<File>> for Subjects {
             .deserialize::<MyRow>()
             .map(|x| x.expect("error during deserialization"));
 
-        let mut hs: HashMap<String, Vec<(u16,String)>> = HashMap::new();
+        let mut hs: HashMap<String, Vec<(u16, String)>> = HashMap::new();
         iter.for_each(|x| {
             hs.entry(x.subject_name)
                 .and_modify(|y| {
-                    y.push((x.rimembranza,x.argument.clone()));
+                    y.push((x.rimembranza, x.argument.clone()));
                 })
-                .or_insert(vec![(x.rimembranza,x.argument.clone())]);
+                .or_insert(vec![(x.rimembranza, x.argument.clone())]);
         });
         let subjects = hs
             .into_iter()

@@ -1,5 +1,9 @@
 #![allow(unused)]
-use std::{collections::{HashMap, HashSet}, fs::{File, OpenOptions}, path::PathBuf};
+use std::{
+    collections::{HashMap, HashSet},
+    fs::{File, OpenOptions},
+    path::PathBuf,
+};
 
 use csv::{self, Reader, Writer};
 use serde::{Deserialize, Serialize};
@@ -8,7 +12,7 @@ use super::subject::{self, Subject, Subjects};
 
 pub struct CsvFileHandler {
     pub reader: Reader<File>,
-    pub writer: Writer<File>
+    pub writer: Writer<File>,
 }
 impl CsvFileHandler {
     pub fn new(file_path: PathBuf) -> Self {
@@ -21,11 +25,13 @@ impl CsvFileHandler {
         self.reader
             .deserialize::<MyRow>()
             .map(|x| x.expect("error during deserialization"))
-            .filter(|x| matches!(x, MyRow {
+            .filter(|x| {
+                matches!(x, MyRow {
                     subject_name,
                     argument,
                     rimembranza,
-                } if subject_name == &requested_subject_name))
+                } if subject_name == &requested_subject_name)
+            })
             .map(|x| x.argument)
             .collect::<Vec<String>>()
     }
@@ -36,12 +42,14 @@ impl CsvFileHandler {
             .map(|x| x.subject_name)
             .collect::<HashSet<String>>()
     }
-    pub fn write(mut self, subjects: Subjects){
-        for subj in subjects.0{
+    pub fn write(mut self, subjects: Subjects) {
+        for subj in subjects.0 {
             //dbg!(&subj);
             let rows = Rows::from(subj);
-            rows.0.iter().for_each(|x|{
-                self.writer.serialize(x).expect("Error during serialization");
+            rows.0.iter().for_each(|x| {
+                self.writer
+                    .serialize(x)
+                    .expect("Error during serialization");
             });
         }
     }
@@ -62,9 +70,16 @@ struct Rows(Vec<MyRow>);
 impl From<Subject> for Rows {
     fn from(value: Subject) -> Self {
         Rows(
-            value.weighted_arguments.0.into_iter().map(|(rimembranza, argument)|{
-                MyRow { subject_name: value.name.clone(), argument, rimembranza }
-            }).collect::<Vec<_>>()
+            value
+                .weighted_arguments
+                .0
+                .into_iter()
+                .map(|(rimembranza, argument)| MyRow {
+                    subject_name: value.name.clone(),
+                    argument,
+                    rimembranza,
+                })
+                .collect::<Vec<_>>(),
         )
     }
 }

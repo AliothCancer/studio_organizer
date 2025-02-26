@@ -9,22 +9,19 @@ impl Subjects {
         let _ = table!();
         let mut main_table = Table::new();
         let mut arg_table = Table::new();
-        for subj in self.0.iter(){
-            if subj.name == subject_name{
+        for subj in self.0.iter() {
+            if subj.name == subject_name {
                 let title = subject_name.to_uppercase();
                 main_table.add_row(row![bBdFG -> title]);
-                
+
                 arg_table.add_row(row![bBdFm => "n.","Argument","Rimembranza"]);
-                for (n,arg) in subj.weighted_arguments.0.iter().enumerate(){
-                    arg_table.add_row(row![(n+1).to_string()+".", arg.1, arg.0]);
+                for (n, arg) in subj.weighted_arguments.0.iter().enumerate() {
+                    arg_table.add_row(row![(n + 1).to_string() + ".", arg.1, arg.0]);
                 }
             }
-
         }
-        ;
         main_table.print_tty(true).unwrap();
         arg_table.print_tty(true).unwrap();
-        
     }
 
     /// print all the subjects name written in data_file.typ
