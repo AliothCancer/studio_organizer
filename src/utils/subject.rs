@@ -1,9 +1,38 @@
-use std::collections::HashMap;
+#![allow(dead_code)]
 
-use super::csv_file_handler::{CsvFileHandler, MyRow};
+use std::{collections::HashMap, fs::File};
+
+use csv::Reader;
+
+use super::csv_file_handler::MyRow;
 
 #[derive(Debug)]
 pub struct Subjects(pub Vec<Subject>);
+impl Subjects {
+   
+    /// merge arguments if subject name is already present, otherwise add subject and arguments
+    pub(crate) fn merge_arguments(&mut self, subject_name: &String, arguments: Vec<String>) {
+        
+        if let Some(subject) = self.0.iter_mut().find(|x|&x.name == subject_name){
+            // here the subject is already present
+            // first check differences 
+            
+            let mut new_args = arguments.clone().into_iter().map(|x|(0_u16, x))
+            .filter(|x| !subject.weighted_arguments.0.contains(x)).collect::<Vec<_>>();
+            
+            subject.weighted_arguments.0.append(&mut new_args);
+            println!("Subject: {} merged, current present args:{:?}", subject_name, arguments);
+        }else{
+            // here the subject is not present
+            println!("Subject: {} added with following args:{:?}", subject_name, arguments);
+            self.0.push(Subject::new(subject_name, arguments));
+        }
+    }
+    pub fn add_subject(&mut self,subject: Subject){
+        self.0.push(subject);
+    }
+    
+}
 
 #[derive(Debug)]
 pub struct Subject {
@@ -19,7 +48,7 @@ impl WeightedArgs {
 
         Self(
             args.into_iter()
-                .map(|s| (100, s))
+                .map(|s| (0, s))
                 .collect(),
         )
     }
@@ -35,10 +64,15 @@ impl Subject {
         }
     }
 }
-impl From<CsvFileHandler> for Subjects {
-    fn from(mut value: CsvFileHandler) -> Self {
+impl From<String> for Subject{
+    fn from(value: String) -> Self {
+        Subject { name: value, weighted_arguments: WeightedArgs::new(vec![]) }
+    }
+}
+
+impl From<&mut Reader<File>> for Subjects {
+    fn from(value: &mut Reader<File>) -> Self {
         let iter = value
-            .reader
             .deserialize::<MyRow>()
             .map(|x| x.expect("error during deserialization"));
 

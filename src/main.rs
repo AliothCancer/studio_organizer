@@ -2,7 +2,7 @@ mod utils;
 
 use clap::{ArgAction, Args, Parser, Subcommand};
 use std::path::PathBuf;
-use utils::{csv_file_handler::CsvFileHandler, subject::Subjects};
+use utils::{csv_file_handler::CsvFileHandler, subject::{Subject, Subjects}};
 #[macro_use]
 extern crate prettytable;
 
@@ -43,12 +43,18 @@ struct AddArgs {
 
 fn main() {
     let cli = Cli::parse();
-    let csv_file = CsvFileHandler::new(PathBuf::from("studio_data.csv"));
-    let subjects = Subjects::from(csv_file);
-
+    let file_path = "studio_data.csv";
+    let mut csv_file_handler = CsvFileHandler::new(PathBuf::from(file_path));
+    let mut subjects = Subjects::from(&mut csv_file_handler.reader);
+    
     match &cli.command {
         Commands::Show(args) => subjects.show(args),
-        Commands::Add(args) => subjects.add(args),
+        Commands::Add(args) => {
+            let should_write = subjects.add(args);
+            if should_write{
+                csv_file_handler.write(subjects);
+            }
+        },
     }
 }
 
@@ -62,7 +68,8 @@ impl Subjects {
         }
     }
 
-    fn add(&self, args: &AddArgs) {
+    fn add(&mut self, args: &AddArgs)-> bool {
+        
         // Se sono stati forniti argomenti, li suddividiamo per virgola
         let arg_list = args.arguments.as_ref().map(|s| {
             s.split(',')
@@ -72,12 +79,10 @@ impl Subjects {
 
         match arg_list {
             Some(in_args) => {
-                
-
-                println!("materia: {}", args.subject);
-                println!("Con argomenti: {:?}", in_args)
+                self.merge_arguments(&args.subject, in_args);
             }
-            None => println!("Senza argomenti"),
+            None => self.add_subject(Subject::from(args.subject.clone())),
         }
+        true
     }
 }
