@@ -1,6 +1,6 @@
 mod utils;
 
-use clap::{Parser, Subcommand, Args, ArgAction};
+use clap::{ArgAction, Args, Parser, Subcommand};
 use std::path::PathBuf;
 use utils::{csv_file_handler::CsvFileHandler, subject::Subjects};
 #[macro_use]
@@ -43,39 +43,41 @@ struct AddArgs {
 
 fn main() {
     let cli = Cli::parse();
-
-    match &cli.command {
-        Commands::Show(args) => show(args),
-        Commands::Add(args) => add(args),
-    }
-}
-
-fn show(args: &ShowArgs) {
     let csv_file = CsvFileHandler::new(PathBuf::from("studio_data.csv"));
     let subjects = Subjects::from(csv_file);
 
-    if args.subjects {
-        subjects.list_all_subjects();
-    }
-    if let Some(subject_name) = &args.subject {
-        subjects.list_subject_args(subject_name);
+    match &cli.command {
+        Commands::Show(args) => subjects.show(args),
+        Commands::Add(args) => subjects.add(args),
     }
 }
 
-fn add(args: &AddArgs) {
-    // Se sono stati forniti argomenti, li suddividiamo per virgola
-    let arg_list = args.arguments.as_ref().map(|s| {
-        s.split(',')
-         .map(|s| s.trim().to_string())
-         .collect::<Vec<_>>()
-    });
-    
-    
-    match arg_list {
-        Some(in_args) => {
-            println!("Aggiunta materia: {}", args.subject);
-            println!("Con argomenti: {:?}", in_args)
-        },
-        None => println!("Senza argomenti"),
+impl Subjects {
+    fn show(&self, args: &ShowArgs) {
+        if args.subjects {
+            self.list_all_subjects();
+        }
+        if let Some(subject_name) = &args.subject {
+            self.list_subject_args(subject_name);
+        }
+    }
+
+    fn add(&self, args: &AddArgs) {
+        // Se sono stati forniti argomenti, li suddividiamo per virgola
+        let arg_list = args.arguments.as_ref().map(|s| {
+            s.split(',')
+                .map(|s| s.trim().to_string())
+                .collect::<Vec<_>>()
+        });
+
+        match arg_list {
+            Some(in_args) => {
+                
+
+                println!("materia: {}", args.subject);
+                println!("Con argomenti: {:?}", in_args)
+            }
+            None => println!("Senza argomenti"),
+        }
     }
 }
