@@ -1,11 +1,11 @@
 mod utils;
 
-use clap::{arg, command, value_parser, Arg, ArgAction, Command};
-use std::{path::PathBuf, str::FromStr};
-use utils::{file_handler::FileHandler, subject::Subject, *};
+use clap::{arg, command, ArgAction, Command};
+use std::{path::{Path, PathBuf}, str::FromStr};
+use utils::{csv_file_handler::{self, CsvFileHandler}, typ_file_handler::TypFileHandler};
 #[macro_use] extern crate prettytable;
 fn main() {
-    let file = FileHandler::new(PathBuf::from_str("data_file.typ").unwrap());
+    let file = TypFileHandler::new(PathBuf::from_str("data_file.typ").unwrap());
     let subjects = file.load_typ_file();
 
     let matches = command!() // requires `cargo` feature
@@ -28,4 +28,6 @@ fn main() {
             subjects.list_subject_args(subject_name);
         }
     }
+    let csv_file = CsvFileHandler::new(PathBuf::from("studio_data.csv"));
+    csv_file.read();
 }

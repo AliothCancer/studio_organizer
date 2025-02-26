@@ -15,7 +15,7 @@ pub struct WeightedArgs {
 impl WeightedArgs {
     pub fn new(args: Vec<String>) -> Self {
         // at the beginning, all arguments have a standard value 100
-        let weights = (0..args.len()).map(|_| 100).collect::<Vec<u16>>();
+        let weights = (0..args.len()).map(|_| 0).collect::<Vec<u16>>();
         Self { args, weights }
     }
     

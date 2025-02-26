@@ -6,11 +6,11 @@ use csv;
 
 use super::subject::{self, Subject, Subjects};
 
-pub struct FileHandler {
+pub struct TypFileHandler {
     typ_file_path: PathBuf,
 }
 
-impl FileHandler {
+impl TypFileHandler {
     pub fn new(file_path: PathBuf) -> Self {
         if file_path.exists() {
             Self {
@@ -39,9 +39,12 @@ impl FileHandler {
             if let Some((start_line_number, _delimiter)) = lines.find(|(_n, x)| x.contains("---")) {
                 // parse the typ file to a Hashmap<String=subject_name,Vec<String=argument>>
                 let parsed_typ = parse_typ(lines);
-                let subjects = parsed_typ.into_iter().map(|(subject_name, arguments)| Subject::new(subject_name,arguments)).collect::<Vec<_>>();
+                let subjects = parsed_typ
+                    .into_iter()
+                    .map(|(subject_name, arguments)| Subject::new(subject_name, arguments))
+                    .collect::<Vec<_>>();
                 Subjects(subjects)
-            }else {
+            } else {
                 Subjects(vec![])
             }
         } else {

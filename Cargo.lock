@@ -307,6 +307,7 @@ dependencies = [
  "clap",
  "csv",
  "prettytable-rs",
+ "serde",
  "ucfirst",
 ]
 

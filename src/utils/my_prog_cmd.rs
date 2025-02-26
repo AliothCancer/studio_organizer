@@ -12,9 +12,9 @@ impl Subjects {
         for subj in self.0.iter(){
             if subj.name == subject_name{
                 let title = subject_name.to_uppercase();
-                main_table.add_row(row![Bb -> title]);
+                main_table.add_row(row![bBdFG -> title]);
                 
-                arg_table.add_row(row![bFm => "n.","Argument","Weight"]);
+                arg_table.add_row(row![bBdFm => "n.","Argument","Rimembranza"]);
                 for (n,(arg, weight)) in subj.weighted_arguments.iter().enumerate(){
                     arg_table.add_row(row![(n+1).to_string()+".", arg,weight]);
                 }
@@ -30,10 +30,11 @@ impl Subjects {
     /// print all the subjects name written in data_file.typ
     pub(crate) fn list_all_subjects(&self) {
         let mut table = Table::new();
+        table.add_row(row![bFg=>"n.","Materie", "n. Arguments"]);
         for (n, subj) in self.0.iter().enumerate() {
             let row = ucfirst(&subj.name);
-
-            table.add_row(row![n + 1, row]);
+            let args_number = subj.weighted_arguments.iter().len();
+            table.add_row(row![n + 1, row, args_number]);
         }
         table.printstd();
     }
