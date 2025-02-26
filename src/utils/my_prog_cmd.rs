@@ -15,8 +15,8 @@ impl Subjects {
                 main_table.add_row(row![bBdFG -> title]);
                 
                 arg_table.add_row(row![bBdFm => "n.","Argument","Rimembranza"]);
-                for (n,(arg, weight)) in subj.weighted_arguments.iter().enumerate(){
-                    arg_table.add_row(row![(n+1).to_string()+".", arg,weight]);
+                for (n,arg) in subj.weighted_arguments.0.iter().enumerate(){
+                    arg_table.add_row(row![(n+1).to_string()+".", arg.1, arg.0]);
                 }
             }
 
@@ -33,7 +33,7 @@ impl Subjects {
         table.add_row(row![bFg=>"n.","Materie", "n. Arguments"]);
         for (n, subj) in self.0.iter().enumerate() {
             let row = ucfirst(&subj.name);
-            let args_number = subj.weighted_arguments.iter().len();
+            let args_number = subj.weighted_arguments.0.iter().len();
             table.add_row(row![n + 1, row, args_number]);
         }
         table.printstd();

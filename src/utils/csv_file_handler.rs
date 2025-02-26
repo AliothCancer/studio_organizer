@@ -1,32 +1,50 @@
 #![allow(unused)]
-use std::path::PathBuf;
+use std::{collections::{HashMap, HashSet}, fs::File, path::PathBuf};
 
-use csv;
+use csv::{self, Reader};
 use serde::{Deserialize, Serialize};
+
+use super::subject;
 
 pub struct CsvFileHandler {
     file_path: PathBuf,
+    pub reader: Reader<File>,
 }
 impl CsvFileHandler {
     pub fn new(file_path: PathBuf) -> Self {
-        Self { file_path }
+        let mut reader = csv::Reader::from_path(file_path.clone()).unwrap();
+        Self { file_path, reader }
     }
-    pub fn read(&self) {
-        let mut reader = csv::Reader::from_path(self.file_path.clone()).unwrap();
-        let rows = reader
+    pub fn get_arguments(&mut self, requested_subject_name: String) -> Vec<String> {
+        self.reader
             .deserialize::<MyRow>()
-            .map(|x| x.expect("errore durante la deserializzazione"))
-            .collect::<Vec<_>>();
-        dbg!(rows);
+            .map(|x| x.expect("error during deserialization"))
+            .filter(|x| match x {
+                MyRow {
+                    subject_name,
+                    argument,
+                    rimembranza,
+                } if subject_name == &requested_subject_name => true,
+                _ => false,
+            })
+            .map(|x| x.argument)
+            .collect::<Vec<String>>()
+    }
+    pub fn get_subjects(&mut self) -> HashSet<String> {
+        self.reader
+            .deserialize::<MyRow>()
+            .map(|x| x.expect("error during deserialization"))
+            .map(|x| x.subject_name)
+            .collect::<HashSet<String>>()
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct MyRow {
+pub struct MyRow {
     #[serde(rename = "materia")]
-    subject_name: String,
+    pub subject_name: String,
     #[serde(rename = "argomento")]
-    argument: String,
+    pub argument: String,
     #[serde(rename = "rimembranza")]
-    rimembranza: u8,
+    pub rimembranza: u16,
 }
