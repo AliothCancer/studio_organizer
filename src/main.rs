@@ -1,10 +1,14 @@
 mod utils;
 
-use clap::{ArgAction, Args, Parser, Subcommand};
-use std::path::PathBuf;
-use utils::{csv_file_handler::CsvFileHandler, subject::{Subject, Subjects}};
 #[macro_use]
 extern crate prettytable;
+
+use clap::{ArgAction, Args, Parser, Subcommand};
+use std::path::PathBuf;
+use utils::{
+    csv_file_handler::CsvFileHandler,
+    subject::{Subject, Subjects},
+};
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -46,15 +50,15 @@ fn main() {
     let file_path = "studio_data.csv";
     let mut csv_file_handler = CsvFileHandler::new(PathBuf::from(file_path));
     let mut subjects = Subjects::from(&mut csv_file_handler.reader);
-    
+
     match &cli.command {
         Commands::Show(args) => subjects.show(args),
         Commands::Add(args) => {
             let should_write = subjects.add(args);
-            if should_write{
+            if should_write {
                 csv_file_handler.write(subjects);
             }
-        },
+        }
     }
 }
 
@@ -68,8 +72,7 @@ impl Subjects {
         }
     }
 
-    fn add(&mut self, args: &AddArgs)-> bool {
-        
+    fn add(&mut self, args: &AddArgs) -> bool {
         // Se sono stati forniti argomenti, li suddividiamo per virgola
         let arg_list = args.arguments.as_ref().map(|s| {
             s.split(',')
